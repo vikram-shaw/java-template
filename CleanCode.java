@@ -23,10 +23,52 @@ class OnlineReaderWriter extends ReaderWriter {
     }
 }
 
+interface IReaderWriterCreator {
+    ReaderWriter Create() throws IOException;
+}
+
+class OfflineReaderWriterCreator implements IReaderWriterCreator {
+    public ReaderWriter Create() throws IOException {
+        String inputFileName = "input.txt";
+        String outputFileName = "output.txt";
+
+        File file = new File(inputFileName);
+        if(!file.exists()) {
+            file.createNewFile();
+        }
+
+        file = new File(outputFileName);
+        if(!file.exists()) {
+            file.createNewFile();
+        }
+        
+        return new OfflineReaderWriter(inputFileName, outputFileName);
+    }
+}
+
+class OnlineReaderWriterCreator implements IReaderWriterCreator {
+    public ReaderWriter Create() throws IOException {
+        return new OnlineReaderWriter();
+    }
+}
+
+class ReaderWriterFactory {
+    public static ReaderWriter get() throws IOException {
+        ReaderWriter readerWriter;
+        if(System.getProperty("LOCAL") != null) {
+            readerWriter = new OnlineReaderWriterCreator().Create();
+        } else if(System.getProperty("ONLINE_JUDGE")!=null) {
+            readerWriter = new OfflineReaderWriterCreator().Create();
+        } else {
+            readerWriter = new OfflineReaderWriterCreator().Create(); // Unnecessary, maybe removed later
+        }
+        return readerWriter;
+    }
+}
+
 class CleanCode {
     public static void main(String str[]) throws IOException{
-        ReaderWriter reader = new OfflineReaderWriter("input.txt", "output.txt");
-        // ReaderWriter reader = new OnlineReaderWriter();
+        ReaderWriter reader = ReaderWriterFactory.get();
         String name = reader.in.readLine();
         reader.out.println("You name is " + name);
     }
