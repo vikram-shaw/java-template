@@ -28,20 +28,12 @@ interface IReaderWriterCreator {
 }
 
 class OfflineReaderWriterCreator implements IReaderWriterCreator {
+    String inputFileName, outputFileName;
+    OfflineReaderWriterCreator(String inputFileName, String outputFileName) {
+        this.inputFileName = inputFileName;
+        this.outputFileName = outputFileName;
+    }
     public ReaderWriter Create() throws IOException {
-        String inputFileName = "input.txt";
-        String outputFileName = "output.txt";
-
-        File file = new File(inputFileName);
-        if(!file.exists()) {
-            file.createNewFile();
-        }
-
-        file = new File(outputFileName);
-        if(!file.exists()) {
-            file.createNewFile();
-        }
-        
         return new OfflineReaderWriter(inputFileName, outputFileName);
     }
 }
@@ -55,12 +47,11 @@ class OnlineReaderWriterCreator implements IReaderWriterCreator {
 class ReaderWriterFactory {
     public static ReaderWriter get() throws IOException {
         ReaderWriter readerWriter;
-        if(System.getProperty("LOCAL") != null) {
+        if(System.getenv("LOCAL_JAVA") == null) {
             readerWriter = new OnlineReaderWriterCreator().Create();
-        } else if(System.getProperty("ONLINE_JUDGE")!=null) {
-            readerWriter = new OfflineReaderWriterCreator().Create();
         } else {
-            readerWriter = new OfflineReaderWriterCreator().Create(); // Unnecessary, maybe removed later
+            String inputFileName = "input.txt", outputFileName = "output.txt";
+            readerWriter = new OfflineReaderWriterCreator(inputFileName, outputFileName).Create();
         }
         return readerWriter;
     }
